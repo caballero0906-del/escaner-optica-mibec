@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Escáner Automático | Óptica Mibec</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #101827;
+      color: white;
+      text-align: center;
+      padding: 15px;
+    }
+    h2 { color: #38bdf8; }
+    video {
+      width: 100%;
+      max-width: 600px;
+      border: 3px solid #38bdf8;
+      border-radius: 12px;
+    }
+    button {
+      background: #16a34a;
+      color: white;
+      border: 0;
+      padding: 15px;
+      margin: 10px;
+      border-radius: 10px;
+      font-size: 18px;
+    }
+    #mensaje { font-size: 18px; }
+  </style>
+</head>
+<body>
+
+<h2>📷 ÓPTICA MIBEC</h2>
+<h3>ESCÁNER AUTOMÁTICO</h3>
+
+<video id="video" autoplay playsinline muted></video>
+
+<p id="mensaje">Cámara desactivada</p>
+
+<button onclick="iniciar()">📷 ACTIVAR ESCÁNER</button>
+<button onclick="detener()">DETENER</button>
+
+<h3>Último código: <span id="codigo">---</span></h3>
+<h3>Lecturas: <span id="total">0</span></h3>
+
+<script>
+let stream = null;
+let detector = null;
+let activo = false;
+let ultimoCodigo = "";
+let ultimaLectura = 0;
+let total = 0;
+
+async function iniciar() {
+  try {
+    if (!("BarcodeDetector" in window)) {
+      document.getElementById("mensaje").textContent =
+        "Este navegador no admite el detector de códigos.";
+      return;
+    }
+
+    detector = new BarcodeDetector({
+      formats: ["code_128", "code_39", "ean_13", "ean_8"]
+    });
+
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" },
+      audio: false
+    });
+
+    const video = document.getElementById("video");
+    video.srcObject = stream;
+    await video.play();
+
+    activo = true;
+    document.getElementById("mensaje").textContent =
+      "Escáner activo. Apunta al código de barras.";
+
+    escanear();
+  } catch (error) {
+    document.getElementById("mensaje").textContent =
+      "No se pudo activar la cámara: " + error.message;
+  }
+}
+
+async function escanear() {
+  if (!activo) return;
+
+  try {
+    const codigos = await detector.detect(
+      document.getElementById("video")
+    );
+
+    if (codigos.length > 0) {
+      const codigo = codigos[0].rawValue;
+      const ahora = Date.now();
+
+      // Evita contar repetidamente el mismo código
+      // mientras permanece frente a la cámara.
+      if (codigo !== ultimoCodigo || ahora - ultimaLectura > 3000) {
+        ultimoCodigo = codigo;
+        ultimaLectura = ahora;
+        total++;
+
+        document.getElementById("codigo").textContent = codigo;
+        document.getElementById("total").textContent = total;
+        document.getElementById("mensaje").textContent =
+          "Código detectado correctamente";
+      }
+    }
+  } catch (error) {
+    document.getElementById("mensaje").textContent =
+      "Error al leer: " + error.message;
+  }
+
+  if (activo) setTimeout(escanear, 300);
+}
+
+function detener() {
+  activo = false;
+
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+    stream = null;
+  }
+
+  document.getElementById("mensaje").textContent =
+    "Escáner detenido";
+}
+</script>
+
+</body>
+</html>
