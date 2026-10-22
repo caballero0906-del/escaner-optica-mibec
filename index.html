@@ -45,7 +45,23 @@
 
 <h3>Último código: <span id="codigo">---</span></h3>
 <h3>Lecturas: <span id="total">0</span></h3>
+<h3>🔢 CONTEO POR CANTIDAD</h3>
 
+<input
+  type="number"
+  id="cantidadManual"
+  min="1"
+  value="1"
+  style="font-size:20px; width:100px; padding:10px;"
+>
+
+<br>
+
+<button type="button" onclick="agregarCantidadManual()">
+  ➕ AGREGAR CANTIDAD
+</button>
+
+<p id="mensajeCantidad"></p>
 <script>
 let stream = null;
 let detector = null;
@@ -130,7 +146,33 @@ if (codigos.length === 0) {
 
   if (activo) setTimeout(escanear, 300);
 }
+function agregarCantidadManual() {
+  const codigo = document.getElementById("codigo").textContent.trim();
 
+  const cantidad = Number(
+    document.getElementById("cantidadManual").value
+  );
+
+  const mensaje = document.getElementById("mensajeCantidad");
+
+  if (!codigo || codigo === "---") {
+    mensaje.textContent = "⚠️ Primero escanea un código de barras.";
+    return;
+  }
+
+  if (!Number.isSafeInteger(cantidad) || cantidad < 1) {
+    mensaje.textContent = "⚠️ Introduce una cantidad válida.";
+    return;
+  }
+
+  total += cantidad;
+
+  document.getElementById("total").textContent = total;
+
+  mensaje.textContent =
+    "✅ Se agregaron " + cantidad +
+    " unidades al código " + codigo;
+}
 function detener() {
   activo = false;
 
