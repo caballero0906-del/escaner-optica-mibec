@@ -73,7 +73,26 @@ let codigoVisible = "";
 let lecturasSinCodigo = 0;
 let ultimaLectura = 0;
 let total = 0;
+let conteoPorProducto = JSON.parse(
+  localStorage.getItem("mibec_conteo_prueba") || "{}"
+);
 
+function guardarConteoLocal() {
+  localStorage.setItem(
+    "mibec_conteo_prueba",
+    JSON.stringify(conteoPorProducto)
+  );
+}
+ function recuperarConteoLocal() {
+  total = Object.values(conteoPorProducto).reduce(
+    (suma, cantidad) => suma + Number(cantidad),
+    0
+  );
+
+  document.getElementById("total").textContent = total;
+}
+
+recuperarConteoLocal();
 async function iniciar() {
   try {
     if (!("BarcodeDetector" in window)) {
@@ -134,7 +153,10 @@ if (codigos.length === 0) {
         ultimoCodigo = codigo;
         ultimaLectura = ahora;
         total++;
+conteoPorProducto[codigo] =
+  (conteoPorProducto[codigo] || 0) + 1;
 
+guardarConteoLocal();
         document.getElementById("codigo").textContent = codigo;
         document.getElementById("total").textContent = total;
         document.getElementById("mensaje").textContent =
@@ -168,7 +190,10 @@ function agregarCantidadManual() {
   }
 
   total += cantidad;
+conteoPorProducto[codigo] =
+  (conteoPorProducto[codigo] || 0) + cantidad;
 
+guardarConteoLocal();
   document.getElementById("total").textContent = total;
 
   mensaje.textContent =
