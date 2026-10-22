@@ -3,145 +3,371 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Escáner Automático | Óptica Mibec</title>
+  <meta name="theme-color" content="#101827">
   <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#101827">
+
+  <title>Escáner Automático | Óptica Mibec</title>
+
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       background: #101827;
       color: white;
       text-align: center;
       padding: 15px;
+      margin: 0;
     }
-    h2 { color: #38bdf8; }
+
+    h2 {
+      color: #38bdf8;
+    }
+
+    h3 {
+      margin-top: 22px;
+    }
+
     video {
       width: 100%;
       max-width: 600px;
       border: 3px solid #38bdf8;
       border-radius: 12px;
+      background: #000;
     }
+
     button {
       background: #16a34a;
       color: white;
       border: 0;
-      padding: 15px;
-      margin: 10px;
+      padding: 12px 15px;
+      margin: 6px;
       border-radius: 10px;
-      font-size: 18px;
+      font-size: 16px;
+      cursor: pointer;
     }
-    #mensaje { font-size: 18px; }
+
+    button:disabled {
+      opacity: 0.5;
+    }
+
+    .rojo {
+      background: #dc2626;
+    }
+
+    .azul {
+      background: #0284c7;
+    }
+
+    .naranja {
+      background: #ea580c;
+    }
+
+    input {
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      max-width: 100%;
+    }
+
+    #mensaje {
+      font-size: 18px;
+      min-height: 25px;
+    }
+
+    #mensajeCantidad {
+      color: #86efac;
+      min-height: 22px;
+    }
+
+    .tarjeta {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 15px;
+      margin: 15px auto;
+      max-width: 650px;
+    }
+
+    .tabla-contenedor {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: white;
+      font-size: 14px;
+    }
+
+    th {
+      background: #0369a1;
+      padding: 12px 6px;
+    }
+
+    td {
+      padding: 10px 5px;
+      border-bottom: 1px solid #475569;
+      word-break: break-word;
+    }
+
+    td button {
+      padding: 8px;
+      margin: 2px;
+      font-size: 15px;
+    }
+
+    .total {
+      font-size: 27px;
+      color: #4ade80;
+      font-weight: bold;
+    }
+
+    .aviso {
+      font-size: 13px;
+      color: #cbd5e1;
+    }
   </style>
 </head>
+
 <body>
 
-<h2>📷 ÓPTICA MIBEC</h2>
-<h3>ESCÁNER AUTOMÁTICO</h3>
+  <h2>📷 ÓPTICA MIBEC</h2>
+  <h3>ESCÁNER AUTOMÁTICO</h3>
 
-<video id="video" autoplay playsinline muted></video>
+  <video id="video" autoplay playsinline muted></video>
 
-<p id="mensaje">Cámara desactivada</p>
+  <p id="mensaje">Cámara desactivada</p>
 
-<button onclick="iniciar()">📷 ACTIVAR ESCÁNER</button>
-<button onclick="detener()">DETENER</button>
+  <button id="btnIniciar" onclick="iniciar()">
+    📷 ACTIVAR ESCÁNER
+  </button>
 
-<h3>Último código: <span id="codigo">---</span></h3>
-<h3>Lecturas: <span id="total">0</span></h3>
-<h3>🔢 CONTEO POR CANTIDAD</h3>
+  <button class="rojo" onclick="detener()">
+    ⏹ DETENER
+  </button>
 
-<input
-  type="number"
-  id="cantidadManual"
-  min="1"
-  value="1"
-  style="font-size:20px; width:100px; padding:10px;"
->
+  <div class="tarjeta">
+    <h3>Último código</h3>
+    <p id="codigo">---</p>
 
-<br>
+    <h3>TOTAL DE UNIDADES CONTADAS</h3>
+    <div class="total" id="total">0</div>
+  </div>
 
-<button type="button" onclick="agregarCantidadManual()">
-  ➕ AGREGAR CANTIDAD
-</button>
+  <div class="tarjeta">
+    <h3>🔢 AGREGAR CANTIDAD</h3>
 
-<p id="mensajeCantidad"></p>
-  <h3>📋 INVENTARIO CONTADO</h3>
+    <p>Primero escanea un producto.</p>
 
-<div style="overflow-x:auto;">
-  <table
-    id="tablaConteo"
-    style="width:100%; border-collapse:collapse; color:white;"
-  >
-    <thead>
-      <tr style="background:#0369a1;">
-        <th style="padding:10px;">Código de barras</th>
-        <th style="padding:10px;">Cantidad</th>
-      </tr>
-    </thead>
-    <tbody id="listaConteo">
-    </tbody>
-  </table>
-</div>
+    <input
+      type="number"
+      id="cantidadManual"
+      min="1"
+      step="1"
+      value="1"
+      style="width:110px;"
+    >
+
+    <br><br>
+
+    <button onclick="agregarCantidadManual()">
+      ➕ AGREGAR CANTIDAD
+    </button>
+
+    <p id="mensajeCantidad"></p>
+  </div>
+
+  <div class="tarjeta">
+    <h3>📋 INVENTARIO CONTADO</h3>
+
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+          <tr>
+            <th>Código de barras</th>
+            <th>Cantidad</th>
+            <th>Corregir</th>
+            <th>Eliminar</th>
+          </tr>
+        </thead>
+
+        <tbody id="listaConteo"></tbody>
+      </table>
+    </div>
+
+    <p id="sinProductos" class="aviso">
+      Todavía no hay productos contados.
+    </p>
+  </div>
+
+  <div class="tarjeta">
+    <h3>💾 RESPALDO DEL INVENTARIO</h3>
+
+    <button class="azul" onclick="descargarCSV()">
+      📥 DESCARGAR CONTEO
+    </button>
+
+    <button class="rojo" onclick="borrarTodo()">
+      🗑️ BORRAR TODO EL CONTEO
+    </button>
+
+    <p class="aviso">
+      El conteo se guarda en este navegador.
+      Descarga un respaldo antes de borrar datos.
+    </p>
+  </div>
+
 <script>
+"use strict";
+
+const CLAVE_CONTEO = "mibec_conteo_prueba";
+
 let stream = null;
 let detector = null;
 let activo = false;
-let ultimoCodigo = "";
 let codigoVisible = "";
 let lecturasSinCodigo = 0;
-let ultimaLectura = 0;
-let total = 0;
-let conteoPorProducto = JSON.parse(
-  localStorage.getItem("mibec_conteo_prueba") || "{}"
-);
+let ultimoCodigo = "";
+
+let conteoPorProducto = {};
+
+try {
+  const guardado = JSON.parse(
+    localStorage.getItem(CLAVE_CONTEO) || "{}"
+  );
+
+  if (
+    guardado &&
+    typeof guardado === "object" &&
+    !Array.isArray(guardado)
+  ) {
+    for (const [codigo, cantidad] of Object.entries(guardado)) {
+      if (
+        typeof codigo === "string" &&
+        codigo.length > 0 &&
+        Number.isSafeInteger(cantidad) &&
+        cantidad > 0
+      ) {
+        conteoPorProducto[codigo] = cantidad;
+      }
+    }
+  }
+} catch (error) {
+  console.error("Error al recuperar el conteo:", error);
+  document.getElementById("mensaje").textContent =
+    "⚠️ No se pudo recuperar el conteo guardado.";
+}
 
 function guardarConteoLocal() {
-  localStorage.setItem(
-    "mibec_conteo_prueba",
-    JSON.stringify(conteoPorProducto)
+  try {
+    localStorage.setItem(
+      CLAVE_CONTEO,
+      JSON.stringify(conteoPorProducto)
+    );
+
+    actualizarPantalla();
+    return true;
+  } catch (error) {
+    alert(
+      "No se pudo guardar el conteo en la tablet. " +
+      "Descarga un respaldo antes de cerrar."
+    );
+    console.error(error);
+    return false;
+  }
+}
+
+function calcularTotal() {
+  return Object.values(conteoPorProducto).reduce(
+    (suma, cantidad) => suma + cantidad,
+    0
   );
+}
+
+function actualizarPantalla() {
+  document.getElementById("total").textContent =
+    calcularTotal();
 
   mostrarInventarioContado();
 }
 
 function mostrarInventarioContado() {
   const lista = document.getElementById("listaConteo");
-
-  if (!lista) return;
-
   lista.innerHTML = "";
 
-  Object.entries(conteoPorProducto).forEach(
-    ([codigo, cantidad]) => {
-      const fila = document.createElement("tr");
+  const productos = Object.entries(conteoPorProducto)
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
-      const celdaCodigo = document.createElement("td");
-      celdaCodigo.textContent = codigo;
-      celdaCodigo.style.padding = "10px";
-      celdaCodigo.style.borderBottom = "1px solid #475569";
+  document.getElementById("sinProductos").style.display =
+    productos.length ? "none" : "block";
 
-      const celdaCantidad = document.createElement("td");
-      celdaCantidad.textContent = cantidad;
-      celdaCantidad.style.padding = "10px";
-      celdaCantidad.style.borderBottom = "1px solid #475569";
+  for (const [codigo, cantidad] of productos) {
+    const fila = document.createElement("tr");
 
-      fila.appendChild(celdaCodigo);
-      fila.appendChild(celdaCantidad);
-      lista.appendChild(fila);
+    const celdaCodigo = document.createElement("td");
+    celdaCodigo.textContent = codigo;
+
+    const celdaCantidad = document.createElement("td");
+    celdaCantidad.textContent = cantidad;
+
+    const celdaCorregir = document.createElement("td");
+    const botonCorregir = document.createElement("button");
+
+    botonCorregir.textContent = "✏️";
+    botonCorregir.className = "naranja";
+    botonCorregir.onclick = () => corregirCantidad(codigo);
+
+    celdaCorregir.appendChild(botonCorregir);
+
+    const celdaEliminar = document.createElement("td");
+    const botonEliminar = document.createElement("button");
+
+    botonEliminar.textContent = "🗑️";
+    botonEliminar.className = "rojo";
+    botonEliminar.onclick = () => eliminarProducto(codigo);
+
+    celdaEliminar.appendChild(botonEliminar);
+
+    fila.appendChild(celdaCodigo);
+    fila.appendChild(celdaCantidad);
+    fila.appendChild(celdaCorregir);
+    fila.appendChild(celdaEliminar);
+
+    lista.appendChild(fila);
+  }
+}
+
+function sumarProducto(codigo, cantidad) {
+  const actual = conteoPorProducto[codigo] || 0;
+  const nuevo = actual + cantidad;
+
+  if (!Number.isSafeInteger(nuevo)) {
+    alert("La cantidad excede el límite permitido.");
+    return false;
+  }
+
+  conteoPorProducto[codigo] = nuevo;
+
+  if (!guardarConteoLocal()) {
+    if (actual === 0) {
+      delete conteoPorProducto[codigo];
+    } else {
+      conteoPorProducto[codigo] = actual;
     }
-  );
-}
- function recuperarConteoLocal() {
-  total = Object.values(conteoPorProducto).reduce(
-    (suma, cantidad) => suma + Number(cantidad),
-    0
-  );
 
-  document.getElementById("total").textContent = total;
-   mostrarInventarioContado();
+    actualizarPantalla();
+    return false;
+  }
+
+  return true;
 }
 
-recuperarConteoLocal();
 async function iniciar() {
+  if (activo) return;
+
   try {
     if (!("BarcodeDetector" in window)) {
       document.getElementById("mensaje").textContent =
@@ -150,23 +376,37 @@ async function iniciar() {
     }
 
     detector = new BarcodeDetector({
-      formats: ["code_128", "code_39", "ean_13", "ean_8"]
+      formats: [
+        "code_128",
+        "code_39",
+        "ean_13",
+        "ean_8"
+      ]
     });
 
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: "environment" },
+      video: {
+        facingMode: "environment"
+      },
       audio: false
     });
 
     const video = document.getElementById("video");
     video.srcObject = stream;
+
     await video.play();
 
     activo = true;
+    codigoVisible = "";
+    lecturasSinCodigo = 0;
+
+    document.getElementById("btnIniciar").disabled = true;
+
     document.getElementById("mensaje").textContent =
       "Escáner activo. Apunta al código de barras.";
 
     escanear();
+
   } catch (error) {
     document.getElementById("mensaje").textContent =
       "No se pudo activar la cámara: " + error.message;
@@ -180,35 +420,30 @@ async function escanear() {
     const codigos = await detector.detect(
       document.getElementById("video")
     );
-if (codigos.length === 0) {
-  lecturasSinCodigo++;
 
-  if (lecturasSinCodigo >= 10) {
-    codigoVisible = "";
-  }
-} else {
-  lecturasSinCodigo = 0;
-}
-    if (codigos.length > 0) {
+    if (codigos.length === 0) {
+      lecturasSinCodigo++;
+
+      if (lecturasSinCodigo >= 10) {
+        codigoVisible = "";
+      }
+    } else {
+      lecturasSinCodigo = 0;
+
       const codigo = codigos[0].rawValue;
-      const ahora = Date.now();
 
-      // Evita contar repetidamente el mismo código
-      // mientras permanece frente a la cámara.
-     if (codigo !== codigoVisible) {
-  codigoVisible = codigo;
-  lecturasSinCodigo = 0;
-        ultimoCodigo = codigo;
-        ultimaLectura = ahora;
-        total++;
-conteoPorProducto[codigo] =
-  (conteoPorProducto[codigo] || 0) + 1;
+      if (codigo !== codigoVisible) {
+        codigoVisible = codigo;
 
-guardarConteoLocal();
-        document.getElementById("codigo").textContent = codigo;
-        document.getElementById("total").textContent = total;
-        document.getElementById("mensaje").textContent =
-          "Código detectado correctamente";
+        if (sumarProducto(codigo, 1)) {
+          ultimoCodigo = codigo;
+
+          document.getElementById("codigo").textContent =
+            codigo;
+
+          document.getElementById("mensaje").textContent =
+            "✅ Código detectado correctamente";
+        }
       }
     }
   } catch (error) {
@@ -216,38 +451,11 @@ guardarConteoLocal();
       "Error al leer: " + error.message;
   }
 
-  if (activo) setTimeout(escanear, 300);
-}
-function agregarCantidadManual() {
-  const codigo = document.getElementById("codigo").textContent.trim();
-
-  const cantidad = Number(
-    document.getElementById("cantidadManual").value
-  );
-
-  const mensaje = document.getElementById("mensajeCantidad");
-
-  if (!codigo || codigo === "---") {
-    mensaje.textContent = "⚠️ Primero escanea un código de barras.";
-    return;
+  if (activo) {
+    setTimeout(escanear, 300);
   }
-
-  if (!Number.isSafeInteger(cantidad) || cantidad < 1) {
-    mensaje.textContent = "⚠️ Introduce una cantidad válida.";
-    return;
-  }
-
-  total += cantidad;
-conteoPorProducto[codigo] =
-  (conteoPorProducto[codigo] || 0) + cantidad;
-
-guardarConteoLocal();
-  document.getElementById("total").textContent = total;
-
-  mensaje.textContent =
-    "✅ Se agregaron " + cantidad +
-    " unidades al código " + codigo;
 }
+
 function detener() {
   activo = false;
 
@@ -256,22 +464,196 @@ function detener() {
     stream = null;
   }
 
+  const video = document.getElementById("video");
+  video.srcObject = null;
+
+  document.getElementById("btnIniciar").disabled = false;
+
   document.getElementById("mensaje").textContent =
     "Escáner detenido";
 }
-</script>
-<script>
+
+function agregarCantidadManual() {
+  const codigo = ultimoCodigo;
+
+  const cantidad = Number(
+    document.getElementById("cantidadManual").value
+  );
+
+  const mensaje = document.getElementById("mensajeCantidad");
+
+  if (!codigo) {
+    mensaje.textContent =
+      "⚠️ Primero escanea un código de barras.";
+    return;
+  }
+
+  if (
+    !Number.isSafeInteger(cantidad) ||
+    cantidad < 1
+  ) {
+    mensaje.textContent =
+      "⚠️ Introduce una cantidad válida.";
+    return;
+  }
+
+  if (sumarProducto(codigo, cantidad)) {
+    mensaje.textContent =
+      "✅ Se agregaron " + cantidad +
+      " unidades al código " + codigo;
+  }
+}
+
+function corregirCantidad(codigo) {
+  const actual = conteoPorProducto[codigo];
+
+  const respuesta = prompt(
+    "Cantidad correcta para el código " + codigo +
+    "\nCantidad actual: " + actual,
+    actual
+  );
+
+  if (respuesta === null) return;
+
+  const texto = respuesta.trim();
+
+  if (
+    !/^\d+$/.test(texto) ||
+    !Number.isSafeInteger(Number(texto)) ||
+    Number(texto) < 0
+  ) {
+    alert("Introduce una cantidad válida (0 o mayor).");
+    return;
+  }
+
+  const nuevaCantidad = Number(texto);
+
+  if (nuevaCantidad === 0) {
+    eliminarProducto(codigo);
+    return;
+  }
+
+  conteoPorProducto[codigo] = nuevaCantidad;
+
+  if (!guardarConteoLocal()) {
+    conteoPorProducto[codigo] = actual;
+    actualizarPantalla();
+  }
+}
+
+function eliminarProducto(codigo) {
+  if (!confirm(
+    "¿Eliminar del conteo el producto " + codigo + "?"
+  )) {
+    return;
+  }
+
+  const cantidadAnterior = conteoPorProducto[codigo];
+
+  delete conteoPorProducto[codigo];
+
+  if (!guardarConteoLocal()) {
+    conteoPorProducto[codigo] = cantidadAnterior;
+    actualizarPantalla();
+  }
+
+  if (ultimoCodigo === codigo) {
+    ultimoCodigo = "";
+    document.getElementById("codigo").textContent = "---";
+  }
+}
+
+function borrarTodo() {
+  if (!confirm(
+    "⚠️ ¿Seguro que deseas borrar TODO el conteo?"
+  )) {
+    return;
+  }
+
+  if (!confirm(
+    "Esta acción eliminará todas las cantidades guardadas. " +
+    "¿Deseas continuar?"
+  )) {
+    return;
+  }
+
+  const respaldo = conteoPorProducto;
+  conteoPorProducto = {};
+
+  if (!guardarConteoLocal()) {
+    conteoPorProducto = respaldo;
+    actualizarPantalla();
+    return;
+  }
+
+  ultimoCodigo = "";
+  codigoVisible = "";
+  lecturasSinCodigo = 0;
+
+  document.getElementById("codigo").textContent = "---";
+  document.getElementById("mensajeCantidad").textContent =
+    "Conteo eliminado correctamente.";
+}
+
+function descargarCSV() {
+  const productos = Object.entries(conteoPorProducto);
+
+  if (!productos.length) {
+    alert("No hay productos para descargar.");
+    return;
+  }
+
+  const filas = [
+    ["CodigoBarras", "CantidadContada"],
+    ...productos
+  ];
+
+  const contenido = filas
+    .map(fila =>
+      fila.map(valor => {
+        const texto = String(valor);
+        return '"' + texto.replace(/"/g, '""') + '"';
+      }).join(",")
+    )
+    .join("\r\n");
+
+  const archivo = new Blob(
+    ["\uFEFF" + contenido],
+    { type: "text/csv;charset=utf-8;" }
+  );
+
+  const enlace = document.createElement("a");
+  const url = URL.createObjectURL(archivo);
+
+  enlace.href = url;
+  enlace.download =
+    "conteo_optica_mibec_" +
+    new Date().toISOString().slice(0, 10) +
+    ".csv";
+
+  document.body.appendChild(enlace);
+  enlace.click();
+  enlace.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+actualizarPantalla();
+
+window.addEventListener("pagehide", detener);
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker.register("./sw.js")
       .then(function () {
-        console.log("Escáner Mibec preparado para uso sin conexión");
+        console.log("Modo sin conexión activado");
       })
       .catch(function (error) {
-        console.error("Error al activar modo sin conexión:", error);
+        console.error("Error del modo sin conexión:", error);
       });
   });
 }
 </script>
+
 </body>
 </html>
