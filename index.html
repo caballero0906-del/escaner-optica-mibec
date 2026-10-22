@@ -641,7 +641,8 @@ function descargarCSV() {
 actualizarPantalla();
 
 window.addEventListener("pagehide", detener);
-
+// SERVIDOR DE INVENTARIO V18 - COPIA DE PRUEBA
+const SERVIDOR_V18 = "https://script.google.com/macros/s/AKfycbw-YjNGSZhSpNnBWGORkKvFIMZNpZT2BhafLfNHoW8TUnOQ_Eht-5SGfE9_0Rk8uqp1Ow/exec";
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker.register("./sw.js")
