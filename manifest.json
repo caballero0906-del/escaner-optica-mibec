@@ -1,0 +1,12 @@
+{
+  "name": "Escáner Automático Óptica Mibec",
+  "short_name": "Escáner Mibec",
+  "description": "Escáner de códigos de barras para inventario de Óptica Mibec",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101827",
+  "theme_color": "#101827",
+  "lang": "es",
+  "orientation": "portrait"
+}
