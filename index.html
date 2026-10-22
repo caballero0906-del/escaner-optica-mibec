@@ -51,6 +51,7 @@ let stream = null;
 let detector = null;
 let activo = false;
 let ultimoCodigo = "";
+const codigosContados = new Set();
 let ultimaLectura = 0;
 let total = 0;
 
@@ -100,7 +101,8 @@ async function escanear() {
 
       // Evita contar repetidamente el mismo código
       // mientras permanece frente a la cámara.
-      if (codigo !== ultimoCodigo || ahora - ultimaLectura > 3000) {
+      if (!codigosContados.has(codigo)) {
+  codigosContados.add(codigo);
         ultimoCodigo = codigo;
         ultimaLectura = ahora;
         total++;
