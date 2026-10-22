@@ -51,7 +51,8 @@ let stream = null;
 let detector = null;
 let activo = false;
 let ultimoCodigo = "";
-const codigosContados = new Set();
+let codigoVisible = "";
+let lecturasSinCodigo = 0;
 let ultimaLectura = 0;
 let total = 0;
 
@@ -94,15 +95,24 @@ async function escanear() {
     const codigos = await detector.detect(
       document.getElementById("video")
     );
+if (codigos.length === 0) {
+  lecturasSinCodigo++;
 
+  if (lecturasSinCodigo >= 10) {
+    codigoVisible = "";
+  }
+} else {
+  lecturasSinCodigo = 0;
+}
     if (codigos.length > 0) {
       const codigo = codigos[0].rawValue;
       const ahora = Date.now();
 
       // Evita contar repetidamente el mismo código
       // mientras permanece frente a la cámara.
-      if (!codigosContados.has(codigo)) {
-  codigosContados.add(codigo);
+     if (codigo !== codigoVisible) {
+  codigoVisible = codigo;
+  lecturasSinCodigo = 0;
         ultimoCodigo = codigo;
         ultimaLectura = ahora;
         total++;
