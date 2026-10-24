@@ -703,11 +703,29 @@ async function enviarConteo() {
       "⏳ Hay " + pendientes.length +
       " productos pendientes de enviar.";
 
-    alert(
-      "Se prepararon " + pendientes.length +
-      " productos para sincronizar.\n\n" +
-      "Los datos siguen guardados en la tablet."
-    );
+   // ENVIAR CONTEOS AL SERVIDOR V18
+for (const envio of pendientes) {
+  estado.textContent =
+    "⏳ Enviando producto: " + envio.codigo;
+
+  await fetch(SERVIDOR_V18, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(envio)
+  });
+}
+
+estado.textContent =
+  "⚠️ Solicitudes enviadas. Falta confirmar su registro en Google Sheets.";
+
+alert(
+  "Se intentó enviar " + pendientes.length +
+  " productos.\n\n" +
+  "Comprueba los registros en Google Sheets antes de volver a enviar."
+);
 
   } catch (error) {
     estado.textContent = "⚠️ " + error.message;
