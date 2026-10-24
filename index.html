@@ -643,7 +643,80 @@ function descargarCSV() {
 
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+// ENVÍO DE INVENTARIO A GOOGLE SHEETS V18
+const CLAVE_ENVIOS_V18 = "mibec_envios_v18";
+let enviandoConteo = false;
 
+function guardarEnviosV18(envios) {
+  localStorage.setItem(
+    CLAVE_ENVIOS_V18,
+    JSON.stringify(envios)
+  );
+}
+
+function obtenerEnviosV18() {
+  return JSON.parse(
+    localStorage.getItem(CLAVE_ENVIOS_V18) || "[]"
+  );
+}
+
+function crearEnviosV18() {
+  const pendientes = obtenerEnviosV18();
+
+  if (pendientes.length > 0) {
+    return pendientes;
+  }
+
+  const productos = Object.entries(conteoPorProducto);
+
+  if (productos.length === 0) {
+    throw new Error("No hay productos contados.");
+  }
+
+  const envios = productos.map(([codigo, cantidad]) => ({
+    idEnvio: crypto.randomUUID(),
+    codigo,
+    cantidad
+  }));
+
+  guardarEnviosV18(envios);
+  return envios;
+}
+
+async function enviarConteo() {
+  if (enviandoConteo) return;
+
+  if (!navigator.onLine) {
+    alert("Sin internet. El conteo permanece guardado.");
+    return;
+  }
+
+  enviandoConteo = true;
+
+  const estado = document.getElementById("estadoEnvio");
+  estado.textContent = "⏳ Preparando envío...";
+
+  try {
+    const pendientes = crearEnviosV18();
+
+    estado.textContent =
+      "⏳ Hay " + pendientes.length +
+      " productos pendientes de enviar.";
+
+    alert(
+      "Se prepararon " + pendientes.length +
+      " productos para sincronizar.\n\n" +
+      "Los datos siguen guardados en la tablet."
+    );
+
+  } catch (error) {
+    estado.textContent = "⚠️ " + error.message;
+    alert(error.message);
+
+  } finally {
+    enviandoConteo = false;
+  }
+}
 actualizarPantalla();
 
 window.addEventListener("pagehide", detener);
