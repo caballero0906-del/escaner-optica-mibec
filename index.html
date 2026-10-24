@@ -733,6 +733,30 @@ for (const envio of pendientes) {
     },
     body: JSON.stringify(envio)
   });
+  // COMPROBAR SI EL PRODUCTO SE REGISTRÓ
+try {
+  const confirmado = await consultarConfirmacionV18(
+    envio.idEnvio
+  );
+
+  if (confirmado) {
+    console.log(
+      "Producto confirmado en Google Sheets:",
+      envio.codigo
+    );
+  } else {
+    console.warn(
+      "Producto pendiente de confirmación:",
+      envio.codigo
+    );
+  }
+
+} catch (error) {
+  console.warn(
+    "No se pudo verificar el registro:",
+    error.message
+  );
+}
 }
 
 estado.textContent =
